@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load club_icons %}
+
+{% block title %}Бронирование #{{ booking.booking_number }} — Страйк & Пул{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+  <div>
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+      <h1 style="font-size: 1.85rem; font-weight: 600; letter-spacing: var(--tracking-tight); color: #fff;">
+        Бронирование #{{ booking.booking_number }}
+      </h1>
+      <span class="badge badge-{{ booking.status }}">
+        {{ booking.get_status_display }}
+      </span>
+    </div>
+    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+      Оформлено {{ booking.created_at|date:"d.m.Y в H:i" }} · Клиент: {{ booking.user.first_name|default:booking.user.username }}
+    </p>
+  </div>
+
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <a href="{% url 'booking_receipt' booking.pk %}" target="_blank" class="btn btn-secondary">
+      {% icon 'receipt' %} Квитанция
+    </a>
+    {% if booking.status != 'cancelled' and booking.status != 'completed' %}
+      <a href="{% url 'booking_edit' booking.pk %}" class="btn btn-secondary" style="color: var(--apple-blue);">
+        Редактировать
+      </a>
+      <form action="{% url 'booking_cancel' booking.pk %}" method="post" onsubmit="return confirm('Вы уверены, что хотите отменить эту бронь?');" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Отменить</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Левая колонка: Детали игры и финансовый расчет -->
+  <div>
+    <div class="card">
+      <h2 class="card-title">{% icon 'clock' %} Параметры игры</h2>
+      <table class="table" style="margin-bottom: 0;">
+        <tbody>
+          <tr>
+            <td style="width: 42%; color: var(--text-secondary);">Тип игры:</td>
+            <td><strong>{{ booking.game_type.name }}</strong></td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-secondary);">Выбранные зоны:</td>
+            <td>
+              {% for z in booking.zones.all %}
+                <span class="badge" style="background: rgba(255,255,255,0.08); color: #fff; margin-right: 4px;">{{ z.title }}</span>
+              {% endfor %}
+            </td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-secondary);">Дата сессии:</td>
+            <td><strong>{{ booking.date|date:"d.m.Y (l)" }}</strong></td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-secondary);">Время сессии:</td>
+            <td><strong>{{ booking.start_time|time:"H:i" }} — {{ booking.end_time|time:"H:i" }}</strong> (Всего: {{ booking.hours_total }} ч.)</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-secondary);">Количество гостей:</td>
+            <td>👥 {{ booking.guests_count }} чел.</td>
+          </tr>
+          {% if booking.notes %}
+            <tr>
+              <td style="color: var(--text-secondary);">Пожелания:</td>
+              <td>{{ booking.notes }}</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Финансовая детализация со стыком тарифов -->
+    <div class="card" style="border-top: 3px solid var(--apple-blue);">
+      <h2 class="card-title">{% icon 'receipt' %} Финансовая детализация</h2>
+      <table class="table" style="margin-bottom: 16px;">
+        <tbody>
+          <tr>
+            <td style="color: var(--text-secondary);">Дневные часы (до 18:00):</td>
+            <td style="text-align: right; font-weight: 500;">{{ booking.day_hours }} ч.</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-secondary);">Вечерние часы (после 18:00):</td>
+            <td style="text-align: right; font-weight: 500;">{{ booking.night_hours }} ч.</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-secondary);">Стоимость дорожек до скидки:</td>
+            <td style="text-align: right;">{{ booking.game_cost }} ₽</td>
+          </tr>
+          {% if booking.club_card %}
+            <tr style="color: var(--apple-green);">
+              <td>
+                Скидка по карте ({{ booking.club_card.card_number }} · {{ booking.discount_percent }}%):
+              </td>
+              <td style="text-align: right; font-weight: 600;">-{{ booking.discount_amount }} ₽</td>
+            </tr>
+          {% endif %}
+          <tr>
+            <td style="color: var(--text-secondary);">Предзаказ бара:</td>
+            <td style="text-align: right;">{{ booking.preorder_cost }} ₽</td>
+          </tr>
+          <tr style="font-size: 1.15rem; font-weight: 600; background: rgba(255,255,255,0.04);">
+            <td style="color: #fff;">ИТОГО:</td>
+            <td style="text-align: right; color: var(--apple-blue);">{{ booking.total_cost }} ₽</td>
+          </tr>
+        </tbody>
+      </table>
+
+      {% if booking.day_hours > 0 and booking.night_hours > 0 %}
+        <div class="alert alert-warning" style="margin: 0; font-size: 0.82rem;">
+          🔄 <strong>Стык тарифов:</strong> расчет выполнен раздельно по дневному и вечернему периоду с точным разделением в 18:00.
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Управление для персонала -->
+    {% if is_staff %}
+      <div class="card" style="background: rgba(255, 255, 255, 0.05);">
+        <h2 class="card-title">Статус бронирования (Оператор)</h2>
+        <form method="post" action="{% url 'booking_status_update' booking.pk %}" style="display: flex; gap: 10px; align-items: center;">
+          {% csrf_token %}
+          <select name="status" class="form-control" style="flex: 1;">
+            <option value="pending" {% if booking.status == 'pending' %}selected{% endif %}>Ожидает подтверждения</option>
+            <option value="confirmed" {% if booking.status == 'confirmed' %}selected{% endif %}>Подтверждено</option>
+            <option value="completed" {% if booking.status == 'completed' %}selected{% endif %}>Завершено</option>
+            <option value="cancelled" {% if booking.status == 'cancelled' %}selected{% endif %}>Отменено</option>
+          </select>
+          <button type="submit" class="btn btn-primary btn-sm">Применить</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Правая колонка: Предзаказ бара (CRUD) -->
+  <div>
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+        <h2 style="font-size: 1.15rem; font-weight: 600; margin: 0; letter-spacing: var(--tracking-tight); color: #fff; display: flex; align-items: center; gap: 8px;">
+          {% icon 'cocktail' %} Предзаказ к дорожке
+        </h2>
+        <span style="font-size: 0.95rem; font-weight: 600; color: var(--apple-blue);">{{ booking.preorder_cost }} ₽</span>
+      </div>
+
+      <div class="table-responsive" style="margin-bottom: 16px;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Позиция</th>
+              <th>Кол-во</th>
+              <th>Цена</th>
+              <th>Сумма</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in preorders %}
+              <tr>
+                <td><strong style="color: #fff;">{{ p.menu_item.title }}</strong></td>
+                <td>{{ p.quantity }} шт.</td>
+                <td>{{ p.price_each }} ₽</td>
+                <td><strong style="color: var(--apple-blue);">{{ p.total_price }} ₽</strong></td>
+                <td style="text-align: right;">
+                  {% if booking.status != 'completed' and booking.status != 'cancelled' %}
+                    <form action="{% url 'preorder_delete' p.id %}" method="post" style="display: inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger btn-sm" title="Удалить" style="padding: 2px 8px; font-size: 0.72rem; border-radius: var(--radius-pill);">✕</button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 18px;">
+                  Закуски и напитки ещё не добавлены.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if booking.status != 'completed' and booking.status != 'cancelled' %}
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: var(--radius-md); padding: 16px;">
+          <h3 style="font-size: 0.88rem; font-weight: 600; margin-bottom: 10px; color: #fff;">Добавить в заказ:</h3>
+          <form method="post" action="{% url 'preorder_add' booking.pk %}" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            {% csrf_token %}
+            <div style="flex: 2; min-width: 190px;">
+              {{ preorder_form.menu_item }}
+            </div>
+            <div style="width: 75px;">
+              {{ preorder_form.quantity }}
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="flex-shrink: 0;">+ Добавить</button>
+          </form>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Отзыв -->
+    <div class="card">
+      <h2 class="card-title">Отзыв о визите</h2>
+      {% if booking.review %}
+        <div style="background: rgba(255, 255, 255, 0.03); padding: 16px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <strong style="color: #fff;">Оценка:</strong>
+            <span style="color: var(--apple-orange); font-weight: 600;">
+              {% for i in "12345" %}{% if forloop.counter <= booking.review.rating %}★{% else %}☆{% endif %}{% endfor %}
+            </span>
+          </div>
+          <p style="font-size: 0.88rem; color: var(--text-secondary);">{{ booking.review.comment }}</p>
+          <div style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 8px;">Оставлен {{ booking.review.created_at|date:"d.m.Y" }}</div>
+        </div>
+      {% else %}
+        {% if booking.status == 'completed' and booking.user == request.user %}
+          <form method="post" action="{% url 'review_create' booking.pk %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>Оценка клуба:</label>
+              {{ review_form.rating }}
+            </div>
+            <div class="form-group">
+              <label>Ваш отзыв:</label>
+              {{ review_form.comment }}
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Отправить отзыв</button>
+          </form>
+        {% else %}
+          <p style="font-size: 0.86rem; color: var(--text-secondary);">
+            Форма отзыва станет доступна после завершения игровой сессии.
+          </p>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

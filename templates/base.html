@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Боулинг и бильярдный клуб «Страйк & Пул»{% endblock %}</title>
+  {% load static club_icons %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Навигация Apple Dark Liquid Glass -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="{% url 'home' %}" class="brand-logo">
+        {% icon 'bowling' %}
+        <span>Страйк & Пул</span>
+      </a>
+
+      <nav class="main-nav">
+        <a href="{% url 'home' %}">Клуб</a>
+        <a href="{% url 'booking_create' %}">Бронирование</a>
+        <a href="{% url 'menu_catalog' %}">Бар & Кухня</a>
+        <a href="{% url 'dashboard' %}">Показатели</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'booking_list' %}">Мои бронирования</a>
+        {% endif %}
+      </nav>
+
+      <div class="user-nav">
+        {% if user.is_authenticated %}
+          <span class="user-badge">
+            {% icon 'user' %}
+            <span>{{ user.first_name|default:user.username }}</span>
+            {% if current_user_role == 'admin' %}· Админ
+            {% elif current_user_role == 'operator' %}· Оператор
+            {% elif current_user_role == 'bar_manager' %}· Бар
+            {% endif %}
+          </span>
+          <a href="{% url 'profile' %}" class="btn btn-secondary btn-sm">Профиль</a>
+          <form action="{% url 'logout' %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Выйти</button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}" class="btn btn-secondary btn-sm">Войти</a>
+          <a href="{% url 'register' %}" class="btn btn-primary btn-sm">Регистрация</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Уведомления Django messages -->
+  <div class="container" style="margin-top: 18px;">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Основной контент страницы -->
+  <main class="container" style="flex: 1; padding-top: 14px; padding-bottom: 40px;">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Подвал Apple style -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>«Страйк & Пул»</strong> · Боулинг и бильярдный клуб премиум-класса<br>
+        г. Москва, ул. Спортивная, д. 12 · Ежедневно с 10:00 до 02:00
+      </div>
+      <div>
+        Онлайн-бронирование дорожек и столов · +7 (495) 123-45-67
+      </div>
+    </div>
+  </footer>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static club_icons %}
+
+{% block title %}Бронирование сессии — Страйк & Пул{% endblock %}
+
+{% block content %}
+<div style="max-width: 980px; margin: 0 auto;">
+  <div style="margin-bottom: 24px;">
+    <h1 style="font-size: 1.85rem; font-weight: 600; letter-spacing: var(--tracking-tight); margin-bottom: 6px; color: #fff;">
+      Бронирование сессии
+    </h1>
+    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+      Выберите дату, параметры игры и свободные дорожки. Стоимость пересчитывается автоматически на стыке периодов.
+    </p>
+  </div>
+
+  <div id="calc-warning-box" class="alert alert-warning" style="display: none; font-size: 0.9rem;"></div>
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-error">
+      {% for err in form.non_field_errors %}
+        <div>{{ err }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" id="booking-main-form">
+    {% csrf_token %}
+
+    <div class="grid-2">
+      <!-- Левая колонка: параметры игры и времени -->
+      <div class="card">
+        <h2 class="card-title">{% icon 'clock' %} Параметры сессии</h2>
+
+        <div class="form-group">
+          <label for="id_game_type">Тип игры:</label>
+          {{ form.game_type }}
+          {% if form.game_type.errors %}<div class="form-error">{{ form.game_type.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_date">Дата игры:</label>
+          {{ form.date }}
+          {% if form.date.errors %}<div class="form-error">{{ form.date.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="grid-2" style="gap: 12px;">
+          <div class="form-group">
+            <label for="id_start_time">Время начала:</label>
+            {{ form.start_time }}
+            {% if form.start_time.errors %}<div class="form-error">{{ form.start_time.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_end_time">Время окончания:</label>
+            {{ form.end_time }}
+            {% if form.end_time.errors %}<div class="form-error">{{ form.end_time.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="id_guests_count">Количество гостей в компании:</label>
+          {{ form.guests_count }}
+          <div class="form-help">
+            Лимит боулинга: до 6 человек на одну дорожку. При 7 и более гостях система автоматически требует выбрать минимум 2 дорожки.
+          </div>
+          {% if form.guests_count.errors %}<div class="form-error">{{ form.guests_count.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_club_card_code">Номер клубной карты (для скидки):</label>
+          {{ form.club_card_code }}
+          <div class="form-help">Скидка от 5% до 20% будет учтена мгновенно при вводе номера карты.</div>
+          {% if form.club_card_code.errors %}<div class="form-error">{{ form.club_card_code.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_notes">Пожелания / комментарий:</label>
+          {{ form.notes }}
+        </div>
+      </div>
+
+      <!-- Правая колонка: выбор зон и калькулятор стоимости -->
+      <div>
+        <div class="card">
+          <h2 class="card-title">{% icon 'pool' %} Выбор дорожек и столов</h2>
+          <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Отметьте необходимые зоны для брони:
+          </p>
+
+          {% if form.zones.errors %}
+            <div class="alert alert-error" style="padding: 10px 14px; font-size: 0.85rem;">
+              {{ form.zones.errors.0 }}
+            </div>
+          {% endif %}
+
+          <div class="checkbox-grid" style="max-height: 230px; overflow-y: auto; padding: 2px;">
+            {% for choice in form.zones %}
+              <label class="checkbox-card">
+                {{ choice.tag }}
+                <span style="font-size: 0.88rem; font-weight: 500;">{{ choice.choice_label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Dark Liquid Glass Калькулятор -->
+        <div class="card" style="border: 1px solid rgba(41, 151, 255, 0.35); background: rgba(16, 20, 28, 0.85); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+          <h2 class="card-title" style="color: var(--apple-blue); border-color: rgba(41, 151, 255, 0.15);">
+            {% icon 'chart' %} Расчёт стоимости онлайн
+          </h2>
+          <div id="calc-summary-box">
+            <span style="color: var(--text-secondary); font-size: 0.9rem;">Инициализация расчёта...</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="padding: 14px; font-size: 1rem; font-weight: 500; border-radius: var(--radius-pill); margin-top: 8px;">
+          Подтвердить и забронировать
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/booking.js' %}"></script>
+{% endblock %}

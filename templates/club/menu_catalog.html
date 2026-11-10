@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load club_icons %}
+
+{% block title %}Меню бара и кухни — Страйк & Пул{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+  <div>
+    <h1 style="font-size: 1.85rem; font-weight: 600; letter-spacing: var(--tracking-tight); margin-bottom: 4px; color: #fff;">
+      Бар & Кухня
+    </h1>
+    <p style="color: var(--text-secondary); font-size: 0.92rem;">
+      Подача закусок, пиццы и напитков прямо к вашей игровой дорожке или столу. В меню: {{ total_count }} блюд.
+    </p>
+  </div>
+  {% if user.is_authenticated %}
+    <a href="{% url 'booking_list' %}" class="btn btn-secondary btn-sm">К моим заказам</a>
+  {% endif %}
+</div>
+
+<!-- Панель поиска и фильтров в стиле Apple Dark -->
+<div class="card" style="padding: 18px; margin-bottom: 24px;">
+  <form method="get" action="{% url 'menu_catalog' %}" style="display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Поиск по названию блюда или ингредиентам..." class="form-control" style="flex: 1; min-width: 220px;">
+      <button type="submit" class="btn btn-primary btn-sm" style="padding: 0 20px;">Найти</button>
+      {% if q or category or in_stock or min_price or max_price or sort != 'category' %}
+        <a href="{% url 'menu_catalog' %}" class="btn btn-secondary btn-sm">Сбросить</a>
+      {% endif %}
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end;">
+      <div>
+        <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary);">Категория:</label>
+        <select name="category" class="form-control" onchange="this.form.submit()">
+          <option value="">Все категории</option>
+          {% for code, name in categories %}
+            <option value="{{ code }}" {% if category == code %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px; height: 42px;">
+        <input type="checkbox" name="in_stock" value="1" id="in_stock" {% if in_stock == '1' %}checked{% endif %} onchange="this.form.submit()">
+        <label for="in_stock" style="font-size: 0.86rem; cursor: pointer; margin: 0; color: var(--text-primary);">Только в наличии</label>
+      </div>
+
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <input type="number" name="min_price" value="{{ min_price }}" placeholder="Цена от" class="form-control" style="width: 50%;">
+        <span style="color: var(--text-secondary);">—</span>
+        <input type="number" name="max_price" value="{{ max_price }}" placeholder="до" class="form-control" style="width: 50%;">
+      </div>
+
+      <div>
+        <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary);">Сортировать:</label>
+        <select name="sort" class="form-control" onchange="this.form.submit()">
+          <option value="category" {% if sort == 'category' %}selected{% endif %}>По категориям</option>
+          <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Сначала дешевле (цена ↑)</option>
+          <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Сначала дороже (цена ↓)</option>
+          <option value="title" {% if sort == 'title' %}selected{% endif %}>По названию (А–Я)</option>
+        </select>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Grid блюд с реальными фото -->
+<div class="grid-4">
+  {% for item in page_obj %}
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0; padding: 16px;">
+      <div>
+        <div style="height: 150px; background: rgba(255, 255, 255, 0.04); border-radius: var(--radius-md); margin-bottom: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+          {% if item.photo %}
+            <img src="{{ item.photo.url }}" alt="{{ item.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+          {% else %}
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--apple-blue);">
+              {% if item.category == 'drinks' %}{% icon 'cocktail' %}
+              {% elif item.category == 'hot' %}{% icon 'pizza' %}
+              {% else %}{% icon 'receipt' %}{% endif %}
+            </div>
+          {% endif %}
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+          <h3 style="font-size: 1.02rem; font-weight: 600; letter-spacing: var(--tracking-tight); color: #fff;">{{ item.title }}</h3>
+          <span style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap; margin-left: 6px;">{{ item.weight_volume }}</span>
+        </div>
+        <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 14px; min-height: 48px; line-height: 1.4;">
+          {{ item.description|truncatewords:14 }}
+        </p>
+      </div>
+
+      <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size: 1.15rem; font-weight: 600; color: #fff;">
+          {{ item.price }} ₽
+        </div>
+        {% if item.is_available %}
+          <span class="badge badge-confirmed">В наличии</span>
+        {% else %}
+          <span class="badge badge-cancelled">Нет на складе</span>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <div style="grid-column: 1 / -1; text-align: center; padding: 48px;" class="card">
+      <p style="font-size: 1.05rem; color: var(--text-secondary);">По выбранным критериям ничего не найдено.</p>
+      <a href="{% url 'menu_catalog' %}" class="btn btn-secondary btn-sm" style="margin-top: 14px;">Сбросить фильтры</a>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if page_obj.has_other_pages %}
+  <nav>
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+        <li><a href="?page={{ page_obj.previous_page_number }}{% if extra_params %}&{{ extra_params }}{% endif %}">« Назад</a></li>
+      {% endif %}
+
+      {% for p in page_obj.paginator.page_range %}
+        {% if p == page_obj.number %}
+          <li><span class="current">{{ p }}</span></li>
+        {% else %}
+          <li><a href="?page={{ p }}{% if extra_params %}&{{ extra_params }}{% endif %}">{{ p }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}{% if extra_params %}&{{ extra_params }}{% endif %}">Вперёд »</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+{% endblock %}

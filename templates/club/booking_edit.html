@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Редактирование бронирования #{{ booking.booking_number }} — Страйк & Пул{% endblock %}
+
+{% block content %}
+<div style="max-width: 980px; margin: 0 auto;">
+  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+    <div>
+      <h1 style="font-size: 1.85rem; font-weight: 600; letter-spacing: var(--tracking-tight); margin-bottom: 4px;">
+        Редактирование #{{ booking.booking_number }}
+      </h1>
+      <p style="color: var(--apple-subtle); font-size: 0.92rem;">
+        Скорректируйте параметры даты, времени или список зарезервированных дорожек.
+      </p>
+    </div>
+    <a href="{% url 'booking_detail' booking.pk %}" class="btn btn-secondary btn-sm">К просмотру</a>
+  </div>
+
+  <div id="calc-warning-box" class="alert alert-warning" style="display: none;"></div>
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-error">
+      {% for err in form.non_field_errors %}
+        <div>{{ err }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="grid-2">
+      <div class="card">
+        <h2 class="card-title">Параметры сессии</h2>
+
+        <div class="form-group">
+          <label for="id_game_type">Тип игры:</label>
+          {{ form.game_type }}
+        </div>
+
+        <div class="form-group">
+          <label for="id_date">Дата игры:</label>
+          {{ form.date }}
+        </div>
+
+        <div class="grid-2" style="gap: 12px;">
+          <div class="form-group">
+            <label for="id_start_time">Время начала:</label>
+            {{ form.start_time }}
+          </div>
+          <div class="form-group">
+            <label for="id_end_time">Время окончания:</label>
+            {{ form.end_time }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="id_guests_count">Количество гостей:</label>
+          {{ form.guests_count }}
+        </div>
+
+        <div class="form-group">
+          <label for="id_club_card_code">Номер клубной карты:</label>
+          {{ form.club_card_code }}
+        </div>
+
+        <div class="form-group">
+          <label for="id_notes">Пожелания / комментарий:</label>
+          {{ form.notes }}
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h2 class="card-title">Игровые зоны</h2>
+          {% if form.zones.errors %}
+            <div class="alert alert-error">{{ form.zones.errors.0 }}</div>
+          {% endif %}
+
+          <div class="checkbox-grid" style="max-height: 230px; overflow-y: auto;">
+            {% for choice in form.zones %}
+              <label class="checkbox-card">
+                {{ choice.tag }}
+                <span style="font-size: 0.88rem; font-weight: 500;">{{ choice.choice_label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card" style="border: 1px solid rgba(0, 113, 227, 0.3); background: rgba(255, 255, 255, 0.85);">
+          <h2 class="card-title" style="color: var(--apple-blue); border-color: rgba(0, 113, 227, 0.1);">Пересчёт стоимости</h2>
+          <div id="calc-summary-box">
+            <span style="color: var(--apple-subtle);">Загрузка...</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="padding: 14px; font-size: 1rem; margin-top: 8px;">
+          Сохранить изменения
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/booking.js' %}"></script>
+{% endblock %}

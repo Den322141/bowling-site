@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход — Страйк & Пул{% endblock %}
+
+{% block content %}
+<div style="max-width: 420px; margin: 40px auto;">
+  <div class="card" style="padding: 32px 28px;">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="font-size: 2.2rem; margin-bottom: 8px;">🎳</div>
+      <h2 style="font-size: 1.45rem; font-weight: 600; letter-spacing: var(--tracking-tight); color: var(--apple-black);">
+        Вход в клуб
+      </h2>
+      <p style="font-size: 0.85rem; color: var(--apple-subtle); margin-top: 4px;">
+        Введите логин и пароль для доступа к сессиям
+      </p>
+    </div>
+
+    {% if form.errors %}
+      <div class="alert alert-error">
+        Неверный логин или пароль. Пожалуйста, проверьте введённые данные.
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="id_username">Логин:</label>
+        <input type="text" name="username" autofocus required id="id_username" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label for="id_password">Пароль:</label>
+        <input type="password" name="password" required id="id_password" class="form-control">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" style="padding: 12px; margin-top: 18px;">
+        Войти
+      </button>
+    </form>
+
+    <div style="margin-top: 20px; text-align: center; font-size: 0.86rem; color: var(--apple-subtle);">
+      Ещё нет аккаунта? <a href="{% url 'register' %}" style="color: var(--apple-blue); text-decoration: none; font-weight: 500;">Зарегистрироваться</a>
+    </div>
+
+    <div style="margin-top: 20px; padding: 12px 14px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04); border-radius: var(--radius-md); font-size: 0.78rem; color: var(--apple-body);">
+      <strong>Тестовые учетные записи:</strong><br>
+      • Клиент: <code>ivan</code> / <code>client123</code><br>
+      • Оператор: <code>operator</code> / <code>operator123</code><br>
+      • Администратор: <code>admin</code> / <code>admin123</code>
+    </div>
+  </div>
+</div>
+{% endblock %}

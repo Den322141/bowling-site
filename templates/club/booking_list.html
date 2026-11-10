@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load club_icons %}
+
+{% block title %}Реестр бронирований — Страйк & Пул{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+  <div>
+    <h1 style="font-size: 1.85rem; font-weight: 600; letter-spacing: var(--tracking-tight); margin-bottom: 4px; color: #fff;">
+      {% if is_staff %}Управление бронированиями (Оператор){% else %}Мои бронирования{% endif %}
+    </h1>
+    <p style="color: var(--text-secondary); font-size: 0.92rem;">
+      История игровых сессий, предзаказов бара и талонов бронирования.
+    </p>
+  </div>
+  <div style="display: flex; gap: 10px;">
+    <a href="{% url 'booking_create' %}" class="btn btn-primary">+ Забронировать</a>
+    <a href="{% url 'export_csv' %}" class="btn btn-secondary" title="Экспорт в CSV">📥 Экспорт в CSV</a>
+  </div>
+</div>
+
+<!-- Фильтры в стиле Apple Dark -->
+<div class="card" style="padding: 18px; margin-bottom: 20px;">
+  <form method="get" action="{% url 'booking_list' %}" style="display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Поиск по номеру брони (BK-...) или клиенту" class="form-control" style="flex: 1; min-width: 220px;">
+      <button type="submit" class="btn btn-primary btn-sm" style="padding: 0 20px;">Найти</button>
+      {% if q or status_filter or game_filter or date_filter or sort != 'newest' %}
+        <a href="{% url 'booking_list' %}" class="btn btn-secondary btn-sm">Сбросить</a>
+      {% endif %}
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
+      <div>
+        <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;">Статус:</label>
+        <select name="status" class="form-control" onchange="this.form.submit()">
+          <option value="">Все статусы</option>
+          {% for code, name in statuses %}
+            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;">Тип игры:</label>
+        <select name="game_type" class="form-control" onchange="this.form.submit()">
+          <option value="">Все игры</option>
+          {% for gt in game_types %}
+            <option value="{{ gt.id }}" {% if game_filter == gt.id|stringformat:"s" %}selected{% endif %}>{{ gt.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;">Дата сессии:</label>
+        <input type="date" name="date" value="{{ date_filter }}" class="form-control" onchange="this.form.submit()">
+      </div>
+
+      <div>
+        <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;">Сортировка:</label>
+        <select name="sort" class="form-control" onchange="this.form.submit()">
+          <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Сначала новые даты</option>
+          <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Сначала ранние даты</option>
+          <option value="cost_desc" {% if sort == 'cost_desc' %}selected{% endif %}>По убыванию суммы</option>
+          <option value="cost_asc" {% if sort == 'cost_asc' %}selected{% endif %}>По возрастанию суммы</option>
+        </select>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Таблица бронирований -->
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Номер брони</th>
+        {% if is_staff %}<th>Посетитель</th>{% endif %}
+        <th>Игра</th>
+        <th>Зоны</th>
+        <th>Дата и время</th>
+        <th>Гостей</th>
+        <th>Тариф</th>
+        <th>Итого</th>
+        <th>Статус</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in page_obj %}
+        <tr>
+          <td>
+            <a href="{% url 'booking_detail' b.pk %}" style="font-weight: 600; color: var(--apple-blue); text-decoration: none;">
+              {{ b.booking_number }}
+            </a>
+          </td>
+          {% if is_staff %}
+            <td>{{ b.user.first_name|default:b.user.username }}</td>
+          {% endif %}
+          <td>{{ b.game_type.name }}</td>
+          <td>
+            {% for z in b.zones.all %}
+              <span class="badge" style="background: rgba(255,255,255,0.06); color: #fff;">{{ z.title }}</span>
+            {% endfor %}
+          </td>
+          <td>
+            <strong style="color: #fff;">{{ b.date|date:"d.m.Y" }}</strong><br>
+            <span style="color: var(--text-secondary); font-size: 0.8rem;">
+              {{ b.start_time|time:"H:i" }}–{{ b.end_time|time:"H:i" }} ({{ b.hours_total }}ч)
+            </span>
+          </td>
+          <td>👥 {{ b.guests_count }}</td>
+          <td>
+            {% if b.day_hours > 0 and b.night_hours > 0 %}
+              <span class="badge badge-pending" title="Дневных: {{ b.day_hours }}ч, Вечерних: {{ b.night_hours }}ч">
+                День {{ b.day_hours }}ч / Вечер {{ b.night_hours }}ч
+              </span>
+            {% elif b.night_hours > 0 %}
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Вечерний</span>
+            {% else %}
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Дневной</span>
+            {% endif %}
+          </td>
+          <td style="font-weight: 600; color: #fff;">
+            {{ b.total_cost }} ₽
+          </td>
+          <td>
+            <span class="badge badge-{{ b.status }}">{{ b.get_status_display }}</span>
+          </td>
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <a href="{% url 'booking_detail' b.pk %}" class="btn btn-secondary btn-sm" title="Детали">Инфо</a>
+              <a href="{% url 'booking_receipt' b.pk %}" class="btn btn-secondary btn-sm" target="_blank" title="Печать квитанции">Чек</a>
+              {% if b.status != 'cancelled' and b.status != 'completed' %}
+                <a href="{% url 'booking_edit' b.pk %}" class="btn btn-secondary btn-sm" style="color: var(--apple-blue);" title="Редактировать">Изм.</a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="10" style="text-align: center; padding: 36px; color: var(--text-secondary);">
+            Бронирований по выбранным фильтрам не найдено.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Пагинация -->
+{% if page_obj.has_other_pages %}
+  <nav>
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+        <li><a href="?page={{ page_obj.previous_page_number }}{% if extra_params %}&{{ extra_params }}{% endif %}">« Назад</a></li>
+      {% endif %}
+
+      {% for p in page_obj.paginator.page_range %}
+        {% if p == page_obj.number %}
+          <li><span class="current">{{ p }}</span></li>
+        {% else %}
+          <li><a href="?page={{ p }}{% if extra_params %}&{{ extra_params }}{% endif %}">{{ p }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}{% if extra_params %}&{{ extra_params }}{% endif %}">Вперёд »</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load club_icons %}
+
+{% block title %}Аналитические показатели клуба — Страйк & Пул{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+  <div>
+    <h1 style="font-size: 1.85rem; font-weight: 600; letter-spacing: var(--tracking-tight); margin-bottom: 4px; color: #fff;">
+      Сводные показатели
+    </h1>
+    <p style="color: var(--text-secondary); font-size: 0.92rem;">
+      Ключевые метрики клуба в реальном времени (Count, Sum, Avg, Ratio), графики загрузки и экспорт реестра.
+    </p>
+  </div>
+  <a href="{% url 'export_csv' %}" class="btn btn-secondary">
+    📥 Выгрузить CSV (Excel)
+  </a>
+</div>
+
+<!-- 4 агрегатных виджета Liquid Glass -->
+<div class="grid-4" style="margin-bottom: 24px;">
+  <div class="stat-box">
+    <div class="stat-label">Всего сессий (Count)</div>
+    <div class="stat-value">{{ total_bookings }}</div>
+    <div class="stat-sub">Завершено / подтверждено: {{ completed_bookings }}</div>
+  </div>
+
+  <div class="stat-box">
+    <div class="stat-label">Выручка клуба (Sum)</div>
+    <div class="stat-value" style="color: var(--apple-blue);">{{ total_revenue }} ₽</div>
+    <div class="stat-sub">Дорожки, столы и предзаказы бара</div>
+  </div>
+
+  <div class="stat-box">
+    <div class="stat-label">Средний чек (Avg)</div>
+    <div class="stat-value">{{ avg_check }} ₽</div>
+    <div class="stat-sub">Среднее число гостей: {{ avg_guests }} чел.</div>
+  </div>
+
+  <div class="stat-box">
+    <div class="stat-label">Доля по клубным картам (Ratio)</div>
+    <div class="stat-value" style="color: var(--apple-orange);">{{ card_ratio }}%</div>
+    <div class="stat-sub">{{ card_bookings_count }} из {{ total_bookings }} броней со скидкой</div>
+  </div>
+</div>
+
+<!-- Диаграмма загрузки и статистика направлений -->
+<div class="grid-2" style="margin-bottom: 28px;">
+  <div class="card">
+    <h2 class="card-title">{% icon 'chart' %} Загрузка дорожек и столов по часам</h2>
+    <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
+      Распределение времени начала игровых сессий с 10:00 до 23:00.
+    </p>
+    <div style="position: relative; width: 100%; height: 260px;">
+      <canvas id="hourlyStatsChart" style="width: 100%; height: 100%;"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">{% icon 'pool' %} Популярность направлений</h2>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Направление</th>
+            <th>Бронирований</th>
+            <th>Выручка</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for gs in game_stats %}
+            <tr>
+              <td><strong style="color: #fff;">{{ gs.game_type__name }}</strong></td>
+              <td>{{ gs.count }} сессий</td>
+              <td style="font-weight: 600; color: var(--apple-blue);">{{ gs.revenue|default:"0" }} ₽</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3" style="text-align: center; color: var(--text-secondary);">Нет данных</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Таблица последних бронирований -->
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px;">
+    <h2 style="font-size: 1.15rem; font-weight: 600; letter-spacing: var(--tracking-tight); margin: 0; color: #fff;">
+      Последние зарегистрированные сессии
+    </h2>
+    <a href="{% url 'booking_list' %}" style="font-size: 0.84rem; color: var(--apple-blue); text-decoration: none;">Весь реестр →</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Номер брони</th>
+          <th>Клиент</th>
+          <th>Игра</th>
+          <th>Дата</th>
+          <th>Интервал</th>
+          <th>Сумма</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rb in recent_bookings %}
+          <tr>
+            <td>
+              <a href="{% url 'booking_detail' rb.pk %}" style="font-weight: 600; color: var(--apple-blue); text-decoration: none;">
+                {{ rb.booking_number }}
+              </a>
+            </td>
+            <td>{{ rb.user.first_name|default:rb.user.username }}</td>
+            <td>{{ rb.game_type.name }}</td>
+            <td>{{ rb.date|date:"d.m.Y" }}</td>
+            <td>{{ rb.start_time|time:"H:i" }}–{{ rb.end_time|time:"H:i" }}</td>
+            <td><strong style="color: #fff;">{{ rb.total_cost }} ₽</strong></td>
+            <td><span class="badge badge-{{ rb.status }}">{{ rb.get_status_display }}</span></td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 24px;">Нет данных</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Утонченная диаграмма Apple Charts в темной теме
+  document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('hourlyStatsChart');
+    if (!canvas) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const labels = {{ hours_labels|safe }};
+    const data = {{ hours_counts|safe }};
+    const maxVal = Math.max(...data, 4);
+
+    const padLeft = 32;
+    const padRight = 14;
+    const padTop = 18;
+    const padBottom = 32;
+
+    const chartW = rect.width - padLeft - padRight;
+    const chartH = rect.height - padTop - padBottom;
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = '#86868b';
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+
+    const ySteps = 4;
+    for (let i = 0; i <= ySteps; i++) {
+      const yVal = Math.round((maxVal / ySteps) * i);
+      const y = padTop + chartH - (i / ySteps) * chartH;
+      ctx.beginPath();
+      ctx.moveTo(padLeft, y);
+      ctx.lineTo(rect.width - padRight, y);
+      ctx.stroke();
+      ctx.fillText(yVal.toString(), 8, y + 4);
+    }
+
+    const barWidth = Math.max(6, (chartW / data.length) - 8);
+    for (let i = 0; i < data.length; i++) {
+      const x = padLeft + (i * (chartW / data.length)) + 4;
+      const barH = (data[i] / maxVal) * chartH;
+      const y = padTop + chartH - barH;
+
+      const grad = ctx.createLinearGradient(0, y, 0, padTop + chartH);
+      grad.addColorStop(0, '#2997ff');
+      grad.addColorStop(1, '#0071e3');
+
+      ctx.fillStyle = grad;
+
+      const r = Math.min(barWidth / 2, 4);
+      ctx.beginPath();
+      ctx.moveTo(x, padTop + chartH);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.lineTo(x + barWidth - r, y);
+      ctx.quadraticCurveTo(x + barWidth, y, x + barWidth, y + r);
+      ctx.lineTo(x + barWidth, padTop + chartH);
+      ctx.closePath();
+      ctx.fill();
+
+      if (data[i] > 0) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '500 10px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillText(data[i].toString(), x + (barWidth / 2) - 3, y - 6);
+      }
+
+      ctx.fillStyle = '#86868b';
+      ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+      if (i % 2 === 0) {
+        ctx.fillText(labels[i], x - 4, rect.height - 10);
+      }
+    }
+  });
+</script>
+{% endblock %}

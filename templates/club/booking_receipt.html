@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Талон бронирования #{{ booking.booking_number }} — Страйк & Пул</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #1e293b;
+      background: #f1f5f9;
+    }
+    .ticket-container {
+      max-width: 650px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .ticket-header {
+      text-align: center;
+      border-bottom: 2px dashed #94a3b8;
+      padding-bottom: 18px;
+      margin-bottom: 20px;
+    }
+    .ticket-header h1 {
+      margin: 0 0 6px 0;
+      font-size: 1.4rem;
+    }
+    .ticket-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.95rem;
+    }
+    .ticket-row strong {
+      color: #0f172a;
+    }
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 0.9rem;
+    }
+    .items-table th, .items-table td {
+      border: 1px solid #e2e8f0;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .items-table th {
+      background: #f8fafc;
+    }
+    .total-box {
+      margin-top: 20px;
+      padding: 14px;
+      background: #f8fafc;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .barcode-box {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 2px dashed #94a3b8;
+      font-family: monospace;
+      letter-spacing: 4px;
+      font-size: 1.1rem;
+    }
+    .print-actions {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #1e3a8a;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+    }
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+      .ticket-container {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .print-actions {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="print-actions">
+    <button onclick="window.print();" class="btn">🖨️ Распечатать квитанцию</button>
+  </div>
+
+  <div class="ticket-container">
+    <div class="ticket-header">
+      <h1>КЛУБ БОУЛИНГА И БИЛЬЯРДА «СТРАЙК & ПУЛ»</h1>
+      <div>г. Москва, ул. Спортивная, д. 12 | Тел: +7 (495) 123-45-67</div>
+      <div style="margin-top: 8px; font-weight: bold; font-size: 1.1rem;">
+        ТАЛОН-КВИТАНЦИЯ БРОНИРОВАНИЯ
+      </div>
+    </div>
+
+    <div class="ticket-row">
+      <span>Номер бронирования:</span>
+      <strong>{{ booking.booking_number }}</strong>
+    </div>
+    <div class="ticket-row">
+      <span>Клиент:</span>
+      <strong>{{ booking.user.first_name|default:booking.user.username }}</strong>
+    </div>
+    <div class="ticket-row">
+      <span>Тип игры:</span>
+      <strong>{{ booking.game_type.name }}</strong>
+    </div>
+    <div class="ticket-row">
+      <span>Забронированные зоны:</span>
+      <strong>{% for z in booking.zones.all %}{{ z.title }}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>
+    </div>
+    <div class="ticket-row">
+      <span>Дата игры:</span>
+      <strong>{{ booking.date|date:"d.m.Y" }}</strong>
+    </div>
+    <div class="ticket-row">
+      <span>Интервал времени:</span>
+      <strong>{{ booking.start_time|time:"H:i" }} — {{ booking.end_time|time:"H:i" }} ({{ booking.hours_total }} ч.)</strong>
+    </div>
+    <div class="ticket-row">
+      <span>Количество гостей:</span>
+      <strong>{{ booking.guests_count }} чел.</strong>
+    </div>
+    <div class="ticket-row">
+      <span>Статус:</span>
+      <strong>{{ booking.get_status_display }}</strong>
+    </div>
+
+    {% if preorders %}
+      <h3 style="font-size: 1rem; margin-top: 18px; margin-bottom: 6px;">Предзаказ кухни и бара к дорожке:</h3>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Наименование</th>
+            <th>Кол-во</th>
+            <th>Цена</th>
+            <th>Сумма</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in preorders %}
+            <tr>
+              <td>{{ p.menu_item.title }}</td>
+              <td>{{ p.quantity }}</td>
+              <td>{{ p.price_each }} ₽</td>
+              <td>{{ p.total_price }} ₽</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+
+    <div class="total-box">
+      <div class="ticket-row" style="border: none;">
+        <span>Игра на дорожках / столах (с учетом стыка день/вечер):</span>
+        <span>{{ booking.game_cost }} ₽</span>
+      </div>
+      {% if booking.club_card %}
+        <div class="ticket-row" style="border: none; color: #16a34a;">
+          <span>Скидка по клубной карте ({{ booking.discount_percent }}%):</span>
+          <span>-{{ booking.discount_amount }} ₽</span>
+        </div>
+      {% endif %}
+      <div class="ticket-row" style="border: none;">
+        <span>Предзаказ бара:</span>
+        <span>{{ booking.preorder_cost }} ₽</span>
+      </div>
+      <div class="ticket-row" style="border-top: 1px solid #cbd5e1; margin-top: 8px; padding-top: 8px; font-size: 1.15rem; font-weight: bold;">
+        <span>ИТОГО К ОПЛАТЕ:</span>
+        <span style="color: #1e3a8a;">{{ booking.total_cost }} ₽</span>
+      </div>
+    </div>
+
+    <div class="barcode-box">
+      ||| | ||||| |||| || |||||| | |||| |||<br>
+      *{{ booking.booking_number }}*
+    </div>
+
+    <div style="text-align: center; font-size: 0.8rem; color: #64748b; margin-top: 16px;">
+      Время печати талона: {{ print_time|date:"d.m.Y H:i:s" }}<br>
+      Благодарим за выбор клуба «Страйк & Пул»! Пожалуйста, предъявите талон на стойке ресепшена.
+    </div>
+  </div>
+
+</body>
+</html>

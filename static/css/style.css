@@ -1,0 +1,947 @@
+/* ==========================================================================
+   APPLE LIQUID GLASS — DARK MODE BY DEFAULT
+   Клуб боулинга и бильярда «Страйк & Пул»
+   Премиальная темная эстетика Apple (macOS / iOS Dark Mode):
+   - Глубокий черный (#000000, #0a0a0c) с рассеянным неоновым амбиентом
+   - Матовое жидкое стекло (Liquid Dark Glass) с 30px blur
+   - SF Pro типографика и векторные иконки без эмодзи
+   - Реалистичная интерактивная карта зала (дорожки с кеглями, сукно бильярда)
+   ========================================================================== */
+
+:root {
+  /* Палитра Apple Dark Mode */
+  --bg-deep: #070709;
+  --bg-surface: #0f0f13;
+  --text-primary: #f5f5f7;
+  --text-secondary: #a1a1a6;
+  --text-tertiary: #6e6e73;
+  
+  /* Системные цвета Apple Dark */
+  --apple-blue: #2997ff;
+  --apple-blue-hover: #0077ed;
+  --apple-blue-glow: rgba(41, 151, 255, 0.25);
+  --apple-green: #30d158;
+  --apple-green-glow: rgba(48, 209, 88, 0.3);
+  --apple-red: #ff453a;
+  --apple-orange: #ff9f0a;
+  --apple-purple: #bf5af2;
+  
+  /* Матовое жидкое темное стекло (Liquid Glass) */
+  --glass-bg: rgba(22, 22, 26, 0.72);
+  --glass-bg-hover: rgba(30, 30, 36, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border-light: rgba(255, 255, 255, 0.16);
+  --glass-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --glass-blur: blur(28px) saturate(190%);
+  
+  /* Скругления Apple непрерывные */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 980px;
+
+  --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --tracking-tight: -0.022em;
+  --tracking-normal: -0.01em;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-stack);
+  color: var(--text-primary);
+  background-color: var(--bg-deep);
+  background-image: 
+    radial-gradient(circle at 50% -10%, rgba(41, 151, 255, 0.15) 0%, transparent 55%),
+    radial-gradient(circle at 15% 30%, rgba(191, 90, 242, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 70%, rgba(48, 209, 88, 0.06) 0%, transparent 45%);
+  background-attachment: fixed;
+  line-height: 1.47;
+  font-size: 15px;
+  letter-spacing: var(--tracking-normal);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 22px;
+}
+
+/* ==========================================================================
+   НАВИГАЦИЯ APPLE DARK FROSTED GLASS
+   ========================================================================== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(12, 12, 15, 0.78);
+  backdrop-filter: blur(22px) saturate(190%);
+  -webkit-backdrop-filter: blur(22px) saturate(190%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 54px;
+}
+
+.brand-logo {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: var(--tracking-tight);
+}
+
+.brand-logo svg {
+  color: var(--apple-blue);
+  filter: drop-shadow(0 0 10px rgba(41, 151, 255, 0.5));
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.main-nav a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  transition: color 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+  color: #fff;
+}
+
+.user-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-badge {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ==========================================================================
+   КНОПКИ APPLE PILL SHAPE
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.22s cubic-bezier(0.25, 0.1, 0.25, 1);
+  white-space: nowrap;
+}
+
+.btn svg {
+  flex-shrink: 0;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background-color: var(--apple-blue);
+  color: #fff;
+  box-shadow: 0 4px 16px var(--apple-blue-glow);
+}
+
+.btn-primary:hover {
+  background-color: var(--apple-blue-hover);
+  box-shadow: 0 6px 20px rgba(41, 151, 255, 0.4);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.btn-accent {
+  background-color: var(--apple-orange);
+  color: #000;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(255, 159, 10, 0.3);
+}
+
+.btn-accent:hover {
+  background-color: #f59500;
+}
+
+.btn-danger {
+  background: rgba(255, 69, 58, 0.12);
+  color: var(--apple-red);
+  border: 1px solid rgba(255, 69, 58, 0.25);
+}
+
+.btn-danger:hover {
+  background: var(--apple-red);
+  color: #fff;
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 0.8rem;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ==========================================================================
+   КАРТОЧКИ LIQUID GLASS (ТЕМНОЕ СТЕКЛО)
+   ========================================================================== */
+
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card:hover {
+  border-color: var(--glass-border-light);
+  box-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.7);
+}
+
+.card-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: #fff;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.badge-pending {
+  background: rgba(255, 159, 10, 0.15);
+  color: var(--apple-orange);
+  border: 1px solid rgba(255, 159, 10, 0.3);
+}
+
+.badge-confirmed {
+  background: rgba(48, 209, 88, 0.15);
+  color: var(--apple-green);
+  border: 1px solid rgba(48, 209, 88, 0.3);
+}
+
+.badge-completed {
+  background: rgba(191, 90, 242, 0.15);
+  color: var(--apple-purple);
+  border: 1px solid rgba(191, 90, 242, 0.3);
+}
+
+.badge-cancelled {
+  background: rgba(255, 69, 58, 0.15);
+  color: var(--apple-red);
+  border: 1px solid rgba(255, 69, 58, 0.3);
+}
+
+.badge-vip {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 159, 10, 0.25));
+  color: #ffd60a;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   УВЕДОМЛЕНИЯ
+   ========================================================================== */
+
+.alert {
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid transparent;
+}
+
+.alert-success {
+  background: rgba(48, 209, 88, 0.12);
+  color: #70ff94;
+  border-color: rgba(48, 209, 88, 0.3);
+}
+
+.alert-info {
+  background: rgba(41, 151, 255, 0.12);
+  color: #70b8ff;
+  border-color: rgba(41, 151, 255, 0.3);
+}
+
+.alert-warning {
+  background: rgba(255, 159, 10, 0.12);
+  color: #ffc066;
+  border-color: rgba(255, 159, 10, 0.3);
+}
+
+.alert-error {
+  background: rgba(255, 69, 58, 0.14);
+  color: #ff7d75;
+  border-color: rgba(255, 69, 58, 0.3);
+}
+
+/* ==========================================================================
+   ФОРМЫ APPLE DARK
+   ========================================================================== */
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.form-control,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+select option {
+  background-color: #1a1a20;
+  color: #fff;
+}
+
+.form-control:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 0 4px var(--apple-blue-glow);
+}
+
+.form-help {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  margin-top: 5px;
+}
+
+.form-error {
+  color: var(--apple-red);
+  font-size: 0.82rem;
+  margin-top: 5px;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.checkbox-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.checkbox-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 12px rgba(41, 151, 255, 0.2);
+}
+
+/* ==========================================================================
+   ТАБЛИЦЫ
+   ========================================================================== */
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.table th,
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.table th {
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  letter-spacing: -0.01em;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ==========================================================================
+   СЕТКИ
+   ========================================================================== */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+/* Статистические плашки */
+.stat-box {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--glass-shadow);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-2px);
+  border-color: var(--glass-border-light);
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-value {
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: #fff;
+  margin-top: 6px;
+}
+
+.stat-sub {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   ИНТЕРАКТИВНАЯ КАРТА КЛУБА (СХЕМА ЗАЛОВ НОВОГО УРОВНЯ)
+   ========================================================================== */
+
+.hall-blueprint {
+  background: radial-gradient(circle at 50% 0%, #16161c 0%, #0a0a0d 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  margin-bottom: 32px;
+}
+
+.blueprint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 16px;
+}
+
+.blueprint-legend {
+  display: flex;
+  gap: 18px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-free {
+  background-color: var(--apple-green);
+  box-shadow: 0 0 10px var(--apple-green);
+}
+
+.dot-busy {
+  background-color: var(--apple-red);
+  box-shadow: 0 0 10px var(--apple-red);
+}
+
+.dot-maint {
+  background-color: #636366;
+}
+
+/* Сетка дорожек боулинга (Bowling Lanes) */
+.lanes-blueprint-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+.lane-unit {
+  background: linear-gradient(180deg, #1f1a14 0%, #302619 40%, #1a1612 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.lane-unit:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.lane-unit.available {
+  border-top: 3px solid var(--apple-green);
+}
+
+.lane-unit.busy {
+  border-top: 3px solid var(--apple-red);
+  opacity: 0.65;
+}
+
+.lane-unit.maintenance {
+  border-top: 3px solid #636366;
+  opacity: 0.45;
+}
+
+/* Имитация разметки дорожки боулинга */
+.pin-deck {
+  height: 38px;
+  background: #11100e;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
+}
+
+.pins-triangle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.pin-row {
+  display: flex;
+  gap: 3px;
+}
+
+.pin-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 4px #ffffff;
+}
+
+.lane-wood-board {
+  height: 90px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(210, 160, 95, 0.15) 0px,
+    rgba(210, 160, 95, 0.15) 6px,
+    rgba(140, 100, 50, 0.15) 6px,
+    rgba(140, 100, 50, 0.15) 12px
+  );
+  border-radius: 4px;
+  margin: 6px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.foul-line {
+  width: 80%;
+  height: 1px;
+  background: rgba(255, 69, 58, 0.6);
+}
+
+.lane-number-badge {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.lane-title-sub {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Сетка бильярдных столов (Billiard Tables) */
+.tables-blueprint-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.table-unit {
+  background: #141418;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 14px;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.table-unit:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Имитация бильярдного стола с сукном */
+.felt-table {
+  background: #155724;
+  border: 8px solid #3d2314; /* Темное дерево бортика */
+  border-radius: 8px;
+  height: 90px;
+  position: relative;
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.8), 0 4px 10px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.felt-table.pool {
+  background: #0f4c5c; /* Синее сукно пула */
+  border-color: #2b1d0c;
+}
+
+.felt-table.snooker {
+  background: #0b6623;
+  border-color: #583101;
+}
+
+/* Лузы бильярда */
+.pocket {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #000;
+}
+.pocket-tl { top: 0; left: 0; }
+.pocket-tr { top: 0; right: 0; }
+.pocket-bl { bottom: 0; left: 0; }
+.pocket-br { bottom: 0; right: 0; }
+.pocket-tc { top: 0; left: calc(50% - 4px); }
+.pocket-bc { bottom: 0; left: calc(50% - 4px); }
+
+/* Шары на столе */
+.balls-cluster {
+  display: flex;
+  gap: 3px;
+}
+
+.b-ball {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.b-ball.red { background: #e63946; }
+.b-ball.yellow { background: #ffb703; }
+
+.table-unit-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-unit-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* ==========================================================================
+   ПАГИНАЦИЯ
+   ========================================================================== */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 30px 0;
+  list-style: none;
+}
+
+.pagination a,
+.pagination span {
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.pagination a:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.pagination .current {
+  background: var(--apple-blue);
+  color: #fff;
+  border-color: var(--apple-blue);
+  box-shadow: 0 2px 10px var(--apple-blue-glow);
+}
+
+/* ==========================================================================
+   ПОДВАЛ
+   ========================================================================== */
+
+.site-footer {
+  margin-top: auto;
+  background: rgba(10, 10, 12, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--text-tertiary);
+  padding: 32px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.82rem;
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ==========================================================================
+   АДАПТИВНОСТЬ (360, 768, 1024, 1440 PX)
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .lanes-blueprint-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .tables-blueprint-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .header-inner {
+    height: auto;
+    padding: 12px 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .main-nav {
+    flex-wrap: wrap;
+    gap: 14px;
+    width: 100%;
+  }
+  .grid-3, .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .lanes-blueprint-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tables-blueprint-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding: 0 12px;
+  }
+  .lanes-blueprint-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1260px;
+  }
+}
+
+/* Печатная форма */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .site-header, .site-footer, .no-print, .btn {
+    display: none !important;
+  }
+  .card {
+    border: none;
+    box-shadow: none;
+    background: #fff;
+    padding: 0;
+    color: #000;
+  }
+}

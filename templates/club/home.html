@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load club_icons %}
+
+{% block title %}Клуб боулинга и бильярда «Страйк & Пул»{% endblock %}
+
+{% block content %}
+<!-- Apple Hero Section Dark Glass -->
+<div class="card" style="background: radial-gradient(circle at 50% 20%, rgba(41, 151, 255, 0.15) 0%, rgba(20, 20, 25, 0.85) 100%); text-align: center; padding: 56px 24px; margin-bottom: 32px; border-radius: var(--radius-xl); border: 1px solid rgba(255, 255, 255, 0.14);">
+  <div style="max-width: 680px; margin: 0 auto;">
+    <div style="font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--apple-blue); margin-bottom: 12px; display: inline-flex; align-items: center; gap: 6px;">
+      {% icon 'bowling' %} Пространство спорта и отдыха нового уровня
+    </div>
+    <h1 style="font-size: 2.6rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.15; margin-bottom: 14px; color: #fff;">
+      Страйк & Пул.
+    </h1>
+    <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 26px; line-height: 1.5;">
+      6 профессиональных дорожек боулинга Brunswick, 8 столов русской пирамиды и пула, бар с авторской кухней и мгновенный расчет тарифа онлайн.
+    </p>
+    <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+      <a href="{% url 'booking_create' %}" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.95rem;">
+        {% icon 'calendar' %} Забронировать дорожку или стол
+      </a>
+      <a href="{% url 'menu_catalog' %}" class="btn btn-secondary" style="padding: 10px 24px; font-size: 0.95rem;">
+        {% icon 'cocktail' %} Меню бара и кухни
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Игровые пространства с реальными фотографиями -->
+<div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: baseline;">
+  <h2 style="font-size: 1.35rem; font-weight: 600; letter-spacing: var(--tracking-tight); color: #fff;">
+    Игровые форматы
+  </h2>
+  <span style="font-size: 0.84rem; color: var(--text-secondary);">4 направления</span>
+</div>
+
+<div class="grid-4" style="margin-bottom: 38px;">
+  {% for gt in game_types %}
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0; padding: 18px;">
+      <div>
+        <!-- Реальное качественное фото игровой зоны -->
+        <div style="height: 140px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+          {% with first_zone=gt.zones.first %}
+            {% if first_zone and first_zone.photo %}
+              <img src="{{ first_zone.photo.url }}" alt="{{ gt.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+              <div style="width: 100%; height: 100%; background: #16161b; display: flex; align-items: center; justify-content: center; color: var(--apple-blue);">
+                {% if gt.is_bowling %}{% icon 'bowling' %}{% else %}{% icon 'billiards' %}{% endif %}
+              </div>
+            {% endif %}
+          {% endwith %}
+          <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); padding: 3px 8px; border-radius: var(--radius-pill); font-size: 0.72rem; color: #fff;">
+            {% if gt.is_bowling %}6 дорожек Brunswick{% else %}Сукно Iwan Simonis{% endif %}
+          </div>
+        </div>
+
+        <h3 style="font-size: 1.1rem; font-weight: 600; letter-spacing: var(--tracking-tight); margin-bottom: 6px; color: #fff;">
+          {{ gt.name }}
+        </h3>
+        <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 14px; min-height: 50px; line-height: 1.4;">
+          {{ gt.description }}
+        </p>
+
+        <div style="font-size: 0.78rem; color: var(--text-secondary); background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); padding: 8px 10px; border-radius: var(--radius-sm); margin-bottom: 14px;">
+          👥 До <strong>{{ gt.max_players_per_unit }}</strong> чел. на одну зону
+          {% if gt.is_bowling %}
+            <div style="color: var(--apple-blue); font-weight: 500; margin-top: 3px;">
+              >6 гостей — автоподбор 2 дорожек
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      <a href="{% url 'booking_create' %}?game_type={{ gt.id }}" class="btn btn-secondary btn-block btn-sm">
+        Выбрать {{ gt.name }} →
+      </a>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- НАСТОЯЩАЯ ИНТЕРАКТИВНАЯ КАРТА КЛУБА (BLUEPRINT LOUNGE) -->
+<div class="hall-blueprint">
+  <div class="blueprint-header">
+    <div>
+      <h3 style="font-size: 1.3rem; font-weight: 600; letter-spacing: var(--tracking-tight); color: #fff; display: flex; align-items: center; gap: 8px;">
+        {% icon 'pool' %} Интерактивная схема залов клуба
+      </h3>
+      <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px;">
+        Реалистичное расположение игровых дорожек и столов. Нажмите на зону для быстрого бронирования.
+      </p>
+    </div>
+    <div class="blueprint-legend">
+      <div class="legend-chip"><span class="dot-indicator dot-free"></span> Свободно</div>
+      <div class="legend-chip"><span class="dot-indicator dot-busy"></span> Занято</div>
+      <div class="legend-chip"><span class="dot-indicator dot-maint"></span> Тех. обслуживание</div>
+    </div>
+  </div>
+
+  <!-- СЕКЦИЯ 1: ЗОНА БОУЛИНГА (ДОРОЖКИ 1-6 С РАЗМЕТКОЙ И КЕГЛЯМИ) -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h4 style="font-size: 0.95rem; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 6px;">
+      {% icon 'bowling' %} Боулинг-цех Brunswick (Дорожки 1–6)
+    </h4>
+    <span style="font-size: 0.78rem; color: var(--text-secondary);">Покрытие: светлый клен · Пинспоттеры GS-X</span>
+  </div>
+
+  <div class="lanes-blueprint-grid">
+    {% for zone in zones_bowling %}
+      <a href="{% url 'booking_create' %}?game_type={{ zone.game_type_id }}" class="lane-unit {{ zone.status }}" id="scheme-zone-{{ zone.id }}" style="text-decoration: none;">
+        <!-- Зона кеглей с подсветкой -->
+        <div class="pin-deck">
+          <div class="pins-triangle">
+            <div class="pin-row"><span class="pin-dot"></span></div>
+            <div class="pin-row"><span class="pin-dot"></span><span class="pin-dot"></span></div>
+            <div class="pin-row"><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span></div>
+            <div class="pin-row"><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span></div>
+          </div>
+        </div>
+
+        <!-- Паркетная доска дорожки -->
+        <div class="lane-wood-board">
+          <div class="foul-line"></div>
+          <div style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.4); letter-spacing: 2px;">BRUNSWICK</div>
+        </div>
+
+        <!-- Номер и статус -->
+        <div class="lane-number-badge">№{{ zone.number }}</div>
+        <div class="lane-title-sub">{{ zone.title|truncatechars:18 }}</div>
+        {% if zone.is_vip %}
+          <span class="badge badge-vip" style="font-size: 0.68rem; padding: 2px 6px; margin-top: 4px;">VIP</span>
+        {% endif %}
+        <div class="zone-status-text" style="font-size: 0.72rem; color: {% if zone.status == 'available' %}var(--apple-green){% else %}var(--apple-red){% endif %}; margin-top: 6px; font-weight: 500;">
+          {% if zone.status == 'available' %}● Свободно{% else %}● Занято{% endif %}
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- СЕКЦИЯ 2: БИЛЬЯРДНЫЙ ЛАУНЖ (СТОЛЫ С ЗЕЛЕНЫМ СУКНОМ И ШАРАМИ) -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+    <h4 style="font-size: 0.95rem; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 6px;">
+      {% icon 'billiards' %} Бильярдный лаунж (Русская пирамида, Пул, Снукер)
+    </h4>
+    <span style="font-size: 0.78rem; color: var(--text-secondary);">Сланец Ардезия · Сукно Iwan Simonis 760</span>
+  </div>
+
+  <div class="tables-blueprint-grid">
+    {% for zone in zones_billiards %}
+      <a href="{% url 'booking_create' %}?game_type={{ zone.game_type_id }}" class="table-unit" id="scheme-zone-{{ zone.id }}" style="text-decoration: none;">
+        <!-- Стол с сукном и лузами -->
+        <div class="felt-table {% if 'пул' in zone.title|lower %}pool{% elif 'снукер' in zone.title|lower %}snooker{% endif %}">
+          <span class="pocket pocket-tl"></span>
+          <span class="pocket pocket-tc"></span>
+          <span class="pocket pocket-tr"></span>
+          <span class="pocket pocket-bl"></span>
+          <span class="pocket pocket-bc"></span>
+          <span class="pocket pocket-br"></span>
+
+          <!-- Пирамида шаров на сукне -->
+          <div class="balls-cluster">
+            <span class="b-ball"></span>
+            <span class="b-ball {% if 'пул' in zone.title|lower %}red{% endif %}"></span>
+            <span class="b-ball {% if 'пул' in zone.title|lower %}yellow{% endif %}"></span>
+          </div>
+        </div>
+
+        <div class="table-unit-info">
+          <div>
+            <div class="table-unit-name">#{{ zone.number }} · {{ zone.title|truncatechars:18 }}</div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary);">{{ zone.game_type.name }}</div>
+          </div>
+          <div>
+            {% if zone.is_vip %}<span class="badge badge-vip" style="font-size: 0.65rem; padding: 2px 6px;">VIP</span>{% endif %}
+            <div class="zone-status-text" style="font-size: 0.72rem; color: {% if zone.status == 'available' %}var(--apple-green){% else %}var(--apple-red){% endif %}; text-align: right; margin-top: 4px; font-weight: 500;">
+              {% if zone.status == 'available' %}Свободен{% else %}Занят{% endif %}
+            </div>
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Тарифы и Клубный пропуск (Apple Pass) -->
+<div class="grid-2" style="margin-bottom: 32px;">
+  <div class="card">
+    <h3 class="card-title">
+      {% icon 'clock' %} Тарифная сетка (руб / час)
+    </h3>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Игра</th>
+            <th>Период</th>
+            <th>День (10:00–18:00)</th>
+            <th>Вечер (18:00–02:00)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tariffs %}
+            <tr>
+              <td><strong>{{ t.game_type.name }}</strong></td>
+              <td>{{ t.get_day_type_display }}</td>
+              <td>{{ t.day_rate_per_hour }} ₽</td>
+              <td>{{ t.night_rate_per_hour }} ₽</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="alert alert-info" style="margin-top: 16px; margin-bottom: 0; font-size: 0.84rem;">
+      ℹ️ <strong>Особый автопересчёт на стыке тарифов:</strong> если бронь пересекает 18:00, сервер автоматически делит время на дневной и вечерний периоды, вычисляя точную сумму без округлений.
+    </div>
+  </div>
+
+  <!-- Apple Pass Dark Liquid Glass -->
+  <div class="card" style="background: linear-gradient(135deg, rgba(28, 28, 35, 0.9) 0%, rgba(15, 15, 20, 0.95) 100%); border: 1px solid rgba(255, 255, 255, 0.16);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+      <h3 style="font-size: 1.15rem; font-weight: 600; letter-spacing: var(--tracking-tight); margin: 0; color: #fff; display: flex; align-items: center; gap: 8px;">
+        {% icon 'card' %} Клубная карта
+      </h3>
+      <span class="badge badge-vip">СКИДКА ДО 20%</span>
+    </div>
+
+    <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 18px; line-height: 1.5;">
+      Привилегии для постоянных гостей. Номер карты автоматически рассчитывает персональную скидку на аренду дорожек и бар.
+    </p>
+
+    <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+      <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--apple-blue);">STRIKE & POOL CLUB PASS</div>
+      <div style="font-size: 1.35rem; font-weight: 600; letter-spacing: 3px; margin: 8px 0; color: #fff;">
+        CLUB •••• 1001
+      </div>
+      <div style="font-size: 0.78rem; color: var(--text-secondary);">Скидка от 5% до 20% при каждом визите</div>
+    </div>
+
+    {% if not user.is_authenticated %}
+      <a href="{% url 'register' %}" class="btn btn-primary btn-block">Создать профиль и получить скидку</a>
+    {% else %}
+      <a href="{% url 'profile' %}" class="btn btn-secondary btn-block">
+        Проверить баланс карты в профиле
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Отзывы гостей -->
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px;">
+    <h3 style="font-size: 1.15rem; font-weight: 600; letter-spacing: var(--tracking-tight); margin: 0; color: #fff;">
+      Отзывы гостей
+    </h3>
+    <a href="{% url 'booking_list' %}" style="font-size: 0.84rem; color: var(--apple-blue); text-decoration: none;">Все бронирования →</a>
+  </div>
+  <div class="grid-3">
+    {% for rev in recent_reviews %}
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <strong style="font-size: 0.88rem; color: #fff;">{{ rev.user.first_name|default:rev.user.username }}</strong>
+          <span style="color: var(--apple-orange); font-size: 0.85rem;">
+            {% for i in "12345" %}{% if forloop.counter <= rev.rating %}★{% else %}☆{% endif %}{% endfor %}
+          </span>
+        </div>
+        <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45;">{{ rev.comment }}</p>
+        <div style="font-size: 0.74rem; color: var(--text-tertiary); margin-top: 10px;">
+          {{ rev.created_at|date:"d.m.Y" }}
+        </div>
+      </div>
+    {% empty %}
+      <p style="color: var(--text-secondary);">Пока нет отзывов.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load club_icons %}
+
+{% block title %}Личный профиль — Страйк & Пул{% endblock %}
+
+{% block content %}
+<h1 style="font-size: 1.85rem; font-weight: 600; letter-spacing: var(--tracking-tight); margin-bottom: 24px; color: #fff;">
+  Учётная запись
+</h1>
+
+<div class="grid-2">
+  <!-- Карточка профиля и аватар -->
+  <div class="card">
+    <h2 class="card-title">{% icon 'user' %} Данные профиля</h2>
+
+    <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 22px;">
+      <div style="width: 76px; height: 76px; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.15); box-shadow: 0 4px 16px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: var(--apple-blue); flex-shrink: 0;">
+        {% if profile.avatar %}
+          <img src="{{ profile.avatar.url }}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover;">
+        {% else %}
+          {% icon 'user' %}
+        {% endif %}
+      </div>
+      <div>
+        <h3 style="font-size: 1.2rem; font-weight: 600; letter-spacing: var(--tracking-tight); color: #fff;">{{ user.first_name|default:user.username }}</h3>
+        <p style="font-size: 0.84rem; color: var(--text-secondary);">Логин: {{ user.username }}</p>
+        <span class="badge badge-confirmed" style="margin-top: 6px;">{{ profile.get_role_display }}</span>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="update_profile" value="1">
+
+      <div class="form-group">
+        <label>Имя:</label>
+        <input type="text" name="first_name" value="{{ user.first_name }}" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label>Электронная почта:</label>
+        <input type="email" name="email" value="{{ user.email }}" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label>Телефон:</label>
+        <input type="text" name="phone" value="{{ profile.phone }}" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label>Загрузить аватар (JPG, PNG, WEBP до 5 МБ):</label>
+        <input type="file" name="avatar" class="form-control" accept="image/png, image/jpeg, image/webp">
+        {% if form.avatar.errors %}
+          <div class="form-error">{{ form.avatar.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="margin-top: 6px;">Сохранить изменения</button>
+    </form>
+  </div>
+
+  <!-- Клубный пропуск и безопасность -->
+  <div>
+    <!-- Apple Pass Dark Liquid Glass -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(28, 28, 35, 0.9) 0%, rgba(15, 15, 20, 0.95) 100%); border: 1px solid rgba(255, 255, 255, 0.16);">
+      <h2 class="card-title" style="color: #fff; border-color: rgba(255,255,255,0.1);">
+        {% icon 'card' %} Клубный пропуск (Pass)
+      </h2>
+
+      {% if profile.club_card %}
+        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: var(--radius-md); padding: 18px; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 0.72rem; letter-spacing: 0.12em; color: var(--apple-blue); text-transform: uppercase;">STRIKE & POOL PASS</span>
+            <span class="badge badge-vip">СКИДКА {{ profile.club_card.discount_percent }}%</span>
+          </div>
+          <div style="font-size: 1.35rem; font-weight: 600; letter-spacing: 3px; margin-bottom: 10px; color: #fff;">
+            {{ profile.club_card.card_number }}
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary);">
+            Владелец: {{ profile.club_card.card_holder_name }}<br>
+            Телефон: {{ profile.club_card.phone }}
+          </div>
+        </div>
+        <p style="font-size: 0.84rem; color: var(--apple-green); margin: 0;">
+          ✓ Скидка {{ profile.club_card.discount_percent }}% активна и применяется при бронировании дорожек и бара.
+        </p>
+      {% else %}
+        <p style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 16px;">
+          Привяжите вашу клубную карту для автоматического расчета персональной скидки.
+        </p>
+        <form method="post" action="{% url 'apply_club_card' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label style="color: #e5e5ea;">Номер карты (например, CLUB-1001):</label>
+            {{ card_form.card_number }}
+          </div>
+          <div class="form-group">
+            <label style="color: #e5e5ea;">Телефон при оформлении:</label>
+            {{ card_form.phone }}
+          </div>
+          <button type="submit" class="btn btn-accent btn-block">Привязать карту</button>
+        </form>
+      {% endif %}
+    </div>
+
+    <!-- Безопасность и пароль -->
+    <div class="card">
+      <h2 class="card-title">Безопасность пароля</h2>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="change_password" value="1">
+        {% for f in pwd_form %}
+          <div class="form-group">
+            <label>{{ f.label }}:</label>
+            {{ f }}
+            {% for e in f.errors %}
+              <div class="form-error">{{ e }}</div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-secondary">Обновить пароль</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
