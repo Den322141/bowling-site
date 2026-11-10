@@ -10,7 +10,6 @@
 </head>
 <body>
 
-  <!-- Навигация Apple Dark Liquid Glass -->
   <header class="site-header">
     <div class="container header-inner">
       <a href="{% url 'home' %}" class="brand-logo">
@@ -51,7 +50,6 @@
     </div>
   </header>
 
-  <!-- Уведомления Django messages -->
   <div class="container" style="margin-top: 18px;">
     {% if messages %}
       <div class="messages">
@@ -64,12 +62,10 @@
     {% endif %}
   </div>
 
-  <!-- Основной контент страницы -->
   <main class="container" style="flex: 1; padding-top: 14px; padding-bottom: 40px;">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Подвал Apple style -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <div>

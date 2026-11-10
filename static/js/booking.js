@@ -1,7 +1,3 @@
-/**
- * Интерактивный калькулятор бронирования и схема зала с запросами fetch к серверному JSON API.
- * Реализует проверку вместимости дорожек (>6 гостей -> >=2 дорожек) и расчет стыка тарифов.
- */
 
 document.addEventListener('DOMContentLoaded', function () {
   const gameSelect = document.getElementById('id_game_type');
@@ -50,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
 
-        // Показ предупреждения о вместимости дорожек
+
         if (warningBox) {
           if (data.bowling_warning) {
             warningBox.style.display = 'block';
@@ -60,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         }
 
-        // Индикатор стыка дневного и вечернего тарифов
+
         let splitBadge = '';
         if (data.day_hours > 0 && data.night_hours > 0) {
           splitBadge = `<div class="alert alert-warning" style="margin-top: 8px; padding: 6px 10px; font-size: 0.85rem;">
@@ -99,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   }
 
-  // Обновление доступности зон на схеме
+
   function updateZonesAvailability() {
     if (!dateInput || !startSelect || !endSelect) return;
     const dateVal = dateInput.value;
@@ -127,7 +123,6 @@ document.addEventListener('DOMContentLoaded', function () {
       .catch(e => console.error('Zones fetch error:', e));
   }
 
-  // Слушатели событий
   if (gameSelect) gameSelect.addEventListener('change', () => { fetchPriceCalculation(); updateZonesAvailability(); });
   if (dateInput) dateInput.addEventListener('change', () => { fetchPriceCalculation(); updateZonesAvailability(); });
   if (startSelect) startSelect.addEventListener('change', () => { fetchPriceCalculation(); updateZonesAvailability(); });
@@ -139,7 +134,6 @@ document.addEventListener('DOMContentLoaded', function () {
     cb.addEventListener('change', fetchPriceCalculation);
   });
 
-  // Первоначальный расчёт при загрузке страницы
   fetchPriceCalculation();
   updateZonesAvailability();
 });
